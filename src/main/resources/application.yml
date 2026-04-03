@@ -1,11 +1,18 @@
 spring:
   datasource:
-    # H2 内存数据库的连接地址和默认账号
-    url: jdbc:h2:mem:testdb
+    url: jdbc:h2:mem:testdb;MODE=MySQL
     driver-class-name: org.h2.Driver
     username: sa
     password:
-  # 让 Spring Boot 启动时自动执行我们写的建表 SQL 脚本
   sql:
     init:
       mode: always
+  h2:
+    console:
+      enabled: true
+
+mybatis-plus:                                    # ← 改这里
+  mapper-locations: classpath*:mapper/*.xml      # classpath* 更安全
+  global-config:
+    db-config:
+      id-type: auto
