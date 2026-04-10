@@ -1,27 +1,33 @@
 package com.example.demo.controller;
 
-
-
-import com.example.demo.entity.User;
-import com.example.demo.mapper.UserMapper;
+import com.example.demo.common.Result;
+import com.example.demo.model.dto.UserDTO;
+import com.example.demo.model.vo.UserVO;
 import com.example.demo.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "用户管理", description = "用户相关接口")
 @RestController
+@RequestMapping("/api/users")
+@RequiredArgsConstructor
 public class UserController {
 
-    @Autowired
     //创建一个服务采取控制反转的方法
-    private UserService userService;
+    private final UserService userService;
 
-    @GetMapping("/user")
-    //
-    public User getUserInfo(@RequestParam(value="id", defaultValue = "1") Long id) {
+    @Operation(summary = "通过ID获取用户信息")
+    @GetMapping("/{id}")
+    public Result<UserVO> getUserInfo(@PathVariable Long id) {
         // Controller 层不再关心数据是如何查出来的，只调用 Service 提供的方法
-        //这里得到的是
-        return userService.getUserInfoById(id);
+        return Result.success(userService.getUserInfoById(id));
+    }
+
+    @Operation(summary = "创建新用户")
+    @PostMapping
+    public Result<UserVO> createUserInfo(@RequestBody UserDTO userDTO) {
+        return Result.success(userService.createUser(userDTO));
     }
 }
