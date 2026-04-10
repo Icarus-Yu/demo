@@ -6,8 +6,11 @@ import com.example.demo.model.vo.UserVO;
 import com.example.demo.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "用户管理", description = "用户相关接口")
 @RestController
@@ -25,9 +28,27 @@ public class UserController {
         return Result.success(userService.getUserInfoById(id));
     }
 
+    @Operation(summary = "获取所有用户列表")
+    @GetMapping
+    public Result<List<UserVO>> listUsers() {
+        return Result.success(userService.listAllUsers());
+    }
+
     @Operation(summary = "创建新用户")
     @PostMapping
-    public Result<UserVO> createUserInfo(@RequestBody UserDTO userDTO) {
+    public Result<UserVO> createUserInfo(@RequestBody @Valid UserDTO userDTO) {
         return Result.success(userService.createUser(userDTO));
+    }
+
+    @Operation(summary = "更新用户信息")
+    @PutMapping("/{id}")
+    public Result<UserVO> updateUserInfo(@PathVariable Long id, @RequestBody @Valid UserDTO userDTO) {
+        return Result.success(userService.updateUser(id, userDTO));
+    }
+
+    @Operation(summary = "删除用户")
+    @DeleteMapping("/{id}")
+    public Result<Boolean> deleteUserInfo(@PathVariable Long id) {
+        return Result.success(userService.deleteUser(id));
     }
 }

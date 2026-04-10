@@ -8,6 +8,9 @@ import com.example.demo.mapper.UserMapper;
 import com.example.demo.service.UserService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 //@service 是Spring框架的专属注解,扫描到这里时会对它进行实例化,并放入Ioc容器中进行统一管理
 //@Autowired private UserService userService; 这个代码会让产生一个对象,就是从ioc仓库中找的
@@ -24,10 +27,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 这里可以加入更复杂的业务逻辑，比如判断用户是否被封禁，或者关联查询其他信息
         // 目前仅做简单的透传查询
         User user = this.getById(id);
-        if (user == null) {
-            return null;
-        }
-        return new UserVO(user.getId(), user.getName(), user.getRole());
+        return user == null ? null : new UserVO(user.getId(), user.getName(), user.getRole());
     }
 
     @Override
@@ -37,5 +37,29 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setRole(userDTO.role());
         this.save(user);
         return new UserVO(user.getId(), user.getName(), user.getRole());
+    }
+
+    @Override
+    public UserVO updateUser(Long id, UserDTO userDTO) {
+        User user = this.getById(id);
+        if (user == null) {
+            return null;
+        }
+        user.setName(userDTO.name());
+        user.setRole(userDTO.role());
+        this.updateById(user);
+        return new UserVO(user.getId(), user.getName(), user.getRole());
+    }
+
+    @Override
+    public boolean deleteUser(Long id) {
+        return this.removeById(id);
+    }
+
+    @Override
+    public List<UserVO> listAllUsers() {
+        return this.list().stream()
+                .map(user -> new UserVO(user.getId(), user.getName(), user.getRole()))
+                .collect(Collectors.toList());
     }
 }
