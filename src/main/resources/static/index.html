@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>用户管理系统</title>
+    <style>
+        body { font-family: sans-serif; margin: 40px; background-color: #f4f7f6; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h2 { color: #333; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+        th { background-color: #f8f9fa; }
+        .form-group { margin-bottom: 15px; }
+        input { padding: 8px; width: 200px; margin-right: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 8px 15px; cursor: pointer; border: none; border-radius: 4px; background-color: #007bff; color: white; }
+        button:hover { background-color: #0056b3; }
+        .btn-danger { background-color: #dc3545; }
+        .btn-danger:hover { background-color: #c82333; }
+        .btn-edit { background-color: #ffc107; color: black; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>用户管理</h2>
+    
+    <div id="userForm">
+        <input type="hidden" id="userId">
+        <div class="form-group">
+            <input type="text" id="userName" placeholder="用户名">
+            <input type="text" id="userRole" placeholder="角色">
+            <button onclick="saveUser()" id="saveBtn">添加用户</button>
+            <button onclick="resetForm()" style="background-color: #6c757d;">重置</button>
+        </div>
+    </div>
+
+    <table id="userTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>姓名</th>
+                <th>角色</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody id="userList">
+            <!-- 动态加载 -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+    const API_URL = '/api/users';
+
+    // 获取所有用户
+    async function loadUsers() {
+        const res = await fetch(API_URL);
+        const result = await res.json();
+        const list = document.getElementById('userList');
+        list.innerHTML = '';
+        result.data.forEach(user => {
+            list.innerHTML += `
+                <tr>
+                    <td>${user.id}</td>
+                    <td>${user.name}</td>
+                    <td>${user.role}</td>
+                    <td>
+                        <button class="btn-edit" onclick="editUser(${user.id}, '${user.name}', '${user.role}')">编辑</button>
+                        <button class="btn-danger" onclick="deleteUser(${user.id})">删除</button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    // 保存用户 (新增或更新)
+    async function saveUser() {
+        const id = document.getElementById('userId').value;
+        const name = document.getElementById('userName').value;
+        const role = document.getElementById('userRole').value;
+
+        const method = id ? 'PUT' : 'POST';
+        const url = id ? `${API_URL}/${id}` : API_URL;
+
+        const res = await fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, role })
+        });
+
+        const result = await res.json();
+        if (result.code === 200) {
+            alert('操作成功');
+            resetForm();
+            loadUsers();
+        } else {
+            alert('操作失败: ' + result.message);
+        }
+    }
+
+    // 删除用户
+    async function deleteUser(id) {
+        if (!confirm('确定删除吗？')) return;
+        const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+        const result = await res.json();
+        if (result.code === 200) {
+            loadUsers();
+        }
+    }
+
+    // 编辑回显
+    function editUser(id, name, role) {
+        document.getElementById('userId').value = id;
+        document.getElementById('userName').value = name;
+        document.getElementById('userRole').value = role;
+        document.getElementById('saveBtn').innerText = '更新用户';
+    }
+
+    // 重置表单
+    function resetForm() {
+        document.getElementById('userId').value = '';
+        document.getElementById('userName').value = '';
+        document.getElementById('userRole').value = '';
+        document.getElementById('saveBtn').innerText = '添加用户';
+    }
+
+    // 初始化加载
+    loadUsers();
+</script>
+
+</body>
+</html>
