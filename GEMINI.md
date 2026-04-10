@@ -33,3 +33,5 @@ This project has been refactored to follow modern Spring Boot and MyBatis-Plus b
 - **MyBatis-Plus**: 3.5.9
 - **Database**: H2 (In-memory)
 - **Lombok**: For boilerplate reduction.
+
+gemini --resume '5d9559af-d8d6-4b65-80aa-79e2e53912ed' 
